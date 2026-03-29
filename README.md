@@ -156,20 +156,20 @@ cinema-ticketing/
 ---
 # dependency list
 ```bash
-STT	Dependency	                        Chức năng (1 dòng)
+STT	Dependency	                            Chức năng (1 dòng)
 1	spring-boot-starter-web	                Xây dựng REST API
 2	spring-boot-starter-data-jpa	        Thao tác database với Hibernate
 3	spring-boot-starter-security	        Xác thực và phân quyền
 4	spring-boot-starter-validation	        Kiểm tra dữ liệu đầu vào
-5	mysql-connector-j	                Kết nối MySQL
+5	mysql-connector-j	                    Kết nối MySQL
 6	lombok	                                Giảm code thừa (getter/setter)
-7	spring-boot-configuration-processor	Gợi ý cấu hình trong properties
-8	jjwt-api	                        Tạo và xác thực JWT
-9	jjwt-impl	                        Phần cài đặt JWT
+7	spring-boot-configuration-processor	    Gợi ý cấu hình trong properties
+8	jjwt-api	                            Tạo và xác thực JWT
+9	jjwt-impl	                            Phần cài đặt JWT
 10	jjwt-jackson	                        Hỗ trợ JWT với JSON
-11	zxing-core	                        Tạo mã QR code
+11	zxing-core	                            Tạo mã QR code
 12	zxing-javase	                        Xử lý ảnh QR code
-13	spring-boot-starter-test	        Viết test
+13	spring-boot-starter-test	            Viết test
 14	spring-security-test	                Test bảo mật
 ```
 # Step-by-step coding roadmap
@@ -184,22 +184,22 @@ STT	Dependency	                        Chức năng (1 dòng)
 ---
 ## Giải thích annotation trong DTO
 ```bash
-Annotation	    Ý nghĩa
+Annotation	        Ý nghĩa
 @Data	            Lombok: tự động sinh getter, setter, toString
-@Builder	    Lombok: tạo pattern Builder để tạo object dễ dàng
-@NotBlank	    Validation: không được null hoặc khoảng trắng
+@Builder	        Lombok: tạo pattern Builder để tạo object dễ dàng
+@NotBlank	        Validation: không được null hoặc khoảng trắng
 @Email	            Validation: phải đúng định dạng email
 @Size(min = 6)	    Validation: độ dài tối thiểu 6 ký tự
-@NotNull	    Validation: không được null
+@NotNull	        Validation: không được null
 ```
 ---
 ## So sánh Entity vs DTO
 ```bash
-Tiêu chí	        Entity	                DTO
-Mục đích	        Mapping với database	Giao tiếp với client
-Có password không?	Có	                Không
-Có quan hệ @ManyToOne?	Có	                Không
-Có validation?	        Không	                Có (@NotBlank, @Email...)
-Gửi ra API?	        Không bao giờ	        Có
+Tiêu chí	              Entity	                DTO
+Mục đích	              Mapping với database	    Giao tiếp với client
+Có password không?	      Có	                    Không
+Có quan hệ @ManyToOne?	  Có	                    Không
+Có validation?	          Không	                    Có (@NotBlank, @Email...)
+Gửi ra API?	              Không bao giờ	            Có
 ```
 ---
