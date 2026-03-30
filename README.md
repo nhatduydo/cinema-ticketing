@@ -105,7 +105,6 @@ cinema-ticketing/
 │       │               │   ├── MovieService.java
 │       │               │   ├── ShowtimeService.java
 │       │               │   ├── BookingService.java
-│       │               │   ├── PaymentService.java
 │       │               │   ├── StatisticsService.java
 │       │               │   └── impl/
 │       │               │       ├── AuthServiceImpl.java
@@ -129,7 +128,6 @@ cinema-ticketing/
 │       │               │   ├── JwtUtil.java
 │       │               │   ├── JwtFilter.java
 │       │               │   ├── WebConfig.java
-│       │               │   └── FileUploadConfig.java
 │       │
 │       │               ├── exception/
 │       │               ├── enums/
@@ -141,6 +139,8 @@ cinema-ticketing/
 │       │               │   ├── TicketStatus.java
 │       │               │   └── UserRole.java
 │       │               ├── util/
+│       │               │   └── QRCodeGenerator.java
+│       │               │   └── FileUploadUtil.java
 │       │
 │       │               └── scheduler/
 │       │                   └── TicketExpirationScheduler.java

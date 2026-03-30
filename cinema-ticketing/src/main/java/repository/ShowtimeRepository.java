@@ -14,14 +14,14 @@ import java.util.List;
 @Repository
 public interface ShowtimeRepository extends JpaRepository<entity.Showtime, Long> {
 //    Find showtimes by movie and time slot
-    List<Showtime> findByMovieAndStartTimeBetween(Long movieId, LocalDateTime start, LocalDateTime end);
+    List<Showtime> findByMovieIdAndStartTimeBetween(Long movieId, LocalDateTime start, LocalDateTime end);
 
 //    Find showtimes within a given time range (Tìm suất chiếu trong khoảng thời gian)
     List<Showtime> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
 //    Find upcoming (not yet scheduled) screenings (Tìm suất chiếu sắp tới (chưa diễn ra))
     @Query("SELECT s FROM Showtime s WHERE s.startTime > :now ORDER BY s.startTime ASC")
-    Page<Showtime> findUpcomingShowtimes(@Param("now") LocalDateTime now, Pageable pageable);
+    List<Showtime> findUpcomingShowtimes(@Param("now") LocalDateTime now);
 
 //    Count the number of tickets sold for the screening (Đếm số vé đã bán của suất chiếu)
     @Query("SELECT COUNT(*) FROM Ticket t WHERE t.showtime.id = :showtimeId AND t.status != 'CANCELLED'")
