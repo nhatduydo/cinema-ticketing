@@ -201,6 +201,7 @@ Có validation?	          Không	                    Có (@NotBlank, @Email...)
 Gửi ra API?	              Không bao giờ	            Có
 ```
 ---
+```bash
 Annotation	                        Ý nghĩa
 @RestController	                    Đánh dấu đây là Controller, các method trả về JSON
 @RequestMapping("/api/...")	        Đường dẫn gốc của Controller
@@ -215,3 +216,4 @@ Annotation	                        Ý nghĩa
 @AuthenticationPrincipal	        Lấy thông tin user đang đăng nhập
 @PreAuthorize	                    Phân quyền (chỉ ADMIN mới được gọi)
 @Valid	                            Kích hoạt validation (kiểm tra @NotBlank, @Email...)
+```
