@@ -115,13 +115,11 @@ cinema-ticketing/
 │       │               │       └── StatisticsServiceImpl.java
 │       │
 │       │               ├── controller/
-│       │               │   ├── DiscountType.java
-│       │               │   ├── MovieStatus.java
-│       │               │   ├── PaymentMethod.java
-│       │               │   ├── PaymentStatus.java
-│       │               │   └── SeatType.java
-│       │               │   ├── TicketStatus.java
-│       │               │   └── UserRole.java
+│       │               │   ├── AuthController.java
+│       │               │   ├── MovieController.java
+│       │               │   ├── ShowtimeController.java
+│       │               │   ├── BookingController.java
+│       │               │   └── AdminController.java
 │       │
 │       │               ├── config/
 │       │               │   ├── SecurityConfig.java
@@ -203,3 +201,17 @@ Có validation?	          Không	                    Có (@NotBlank, @Email...)
 Gửi ra API?	              Không bao giờ	            Có
 ```
 ---
+Annotation	                        Ý nghĩa
+@RestController	                    Đánh dấu đây là Controller, các method trả về JSON
+@RequestMapping("/api/...")	        Đường dẫn gốc của Controller
+@GetMapping	                        Xử lý HTTP GET request
+@PostMapping	                    Xử lý HTTP POST request
+@PutMapping	                        Xử lý HTTP PUT request
+@DeleteMapping	                    Xử lý HTTP DELETE request
+@PathVariable	                    Lấy giá trị từ đường dẫn (ví dụ: /movies/{id})
+@RequestParam	                    Lấy giá trị từ query parameter (ví dụ: ?page=1)
+@RequestBody	                    Lấy dữ liệu từ body của request (JSON)
+@RequestPart	                    Lấy file upload (multipart/form-data)
+@AuthenticationPrincipal	        Lấy thông tin user đang đăng nhập
+@PreAuthorize	                    Phân quyền (chỉ ADMIN mới được gọi)
+@Valid	                            Kích hoạt validation (kiểm tra @NotBlank, @Email...)
