@@ -5,6 +5,8 @@ import dto.response.ShowtimeResponse;
 import entity.CinemaHall;
 import entity.Movie;
 import entity.Showtime;
+import exception.BookingException;
+import exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cglib.core.Local;
@@ -30,9 +32,9 @@ public class ShowtimeService {
     @Transactional
     public ShowtimeResponse createShowtime(CreateShowtimeRequest request){
         Movie movie = movieRepository.findById(request.getMovieId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phim với id: " + request.getMovieId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phim với id: " + request.getMovieId()));
         CinemaHall hall = cinemaHallRepository.findById(request.getHallId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng chiếu với id: " + request.getHallId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng chiếu với id: " + request.getHallId()));
 
 //        Kiểm tra trùng suất chiếu (cùng phòng, thời gian gần)
         List<Showtime> existingShowtimes = showtimeRepository.findByStartTimeBetween(
@@ -43,7 +45,7 @@ public class ShowtimeService {
                 .anyMatch(s -> s.getHall().getId().equals(hall.getId()));
 
         if (conflict){
-            throw new RuntimeException("Trùng suất chiếu trong cùng phòng và thời gian gần nhau");
+            throw new BookingException("Trùng suất chiếu trong cùng phòng và thời gian gần nhau");
         }
 
         Showtime showtime = new Showtime();
@@ -62,7 +64,7 @@ public class ShowtimeService {
     @Transactional
     public void deleteShowtime(Long id){
         if (!showtimeRepository.existsById(id)){
-            throw new RuntimeException("Không tìm thấy suất chiếu với id: " + id);
+            throw new ResourceNotFoundException("Không tìm thấy suất chiếu với id: " + id);
         }
         showtimeRepository.deleteById(id);
     }
@@ -71,7 +73,7 @@ public class ShowtimeService {
     @Transactional
     public ShowtimeResponse getShowtimeById (Long id){
         Showtime showtime = showtimeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy suất chiếu với id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy suất chiếu với id: " + id));
         return convertToResponse(showtime);
     }
 
@@ -79,7 +81,7 @@ public class ShowtimeService {
     @Transactional
     public List<ShowtimeResponse> getShowtimesByMovie(Long movieId){
         if (!movieRepository.existsById(movieId)){
-            throw new RuntimeException("Không tìm thấy phim với id: " + movieId);
+            throw new ResourceNotFoundException("Không tìm thấy phim với id: " + movieId);
         }
         return showtimeRepository.findByMovieIdAndStartTimeBetween(
                 movieId,

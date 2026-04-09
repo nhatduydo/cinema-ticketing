@@ -4,6 +4,7 @@ import dto.request.CreateMovieRequest;
 import dto.response.MovieResponse;
 import entity.Movie;
 import enums.MovieStatus;
+import exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,7 +44,7 @@ public class MovieService {
     public MovieResponse createMovie (CreateMovieRequest request, MultipartFile poster){
 //        kiểm tra tên phim đã tồn tại
         if (movieRepository.existsByTitle(request.getTitle())){
-            throw new RuntimeException("Tên phim đã tồn tại");
+            throw new ResourceNotFoundException("Tên phim đã tồn tại");
         }
 
         Movie movie = new Movie();
@@ -67,10 +68,10 @@ public class MovieService {
     @Transactional
     public MovieResponse updatedMovie (Long id, CreateMovieRequest request, MultipartFile poster){
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phim với id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phim với id: " + id));
 
         if (!movie.getTitle().equals(request.getTitle()) && movieRepository.existsByTitle(request.getTitle())){
-            throw new RuntimeException("Tên phim đã tồn tại");
+            throw new ResourceNotFoundException("Tên phim đã tồn tại");
         }
 
         movie.setTitle(request.getTitle());
@@ -92,7 +93,7 @@ public class MovieService {
     @Transactional
     public void deleteMovie(Long id) {
         if (!movieRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy phim với id: " + id);
+            throw new ResourceNotFoundException("Không tìm thấy phim với id: " + id);
         }
         movieRepository.deleteById(id);
     }
@@ -100,7 +101,7 @@ public class MovieService {
     // LẤY PHIM THEO ID
     public MovieResponse getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phim với id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phim với id: " + id));
         return convertToResponse(movie);
     }
 

@@ -128,6 +128,12 @@ cinema-ticketing/
 │       │               │   ├── WebConfig.java
 │       │
 │       │               ├── exception/
+│       │               │   ├── ErrorResponse.java
+│       │               │   ├── ResourceNotFoundException.java
+│       │               │   ├── BookingException.java
+│       │               │   ├── AuthenticationException.java
+│       │               │   ├── GlobalExceptionHandler.java
+│       │               
 │       │               ├── enums/
 │       │               │   ├── DiscountType.java
 │       │               │   ├── MovieStatus.java

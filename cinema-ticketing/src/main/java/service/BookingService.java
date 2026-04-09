@@ -7,6 +7,8 @@ import entity.*;
 import enums.PaymentMethod;
 import enums.PaymentStatus;
 import enums.TicketStatus;
+import exception.BookingException;
+import exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,9 +33,9 @@ public class BookingService {
     private final QRCodeGenerator qrCodeGenerator;
 
 //    Xem sơ đồ ghế (ghê trống và đã đặt)
-    public SeatAvailabilityResponse getAvaiableSeats(Long showtimeId){
+    public SeatAvailabilityResponse getAvailableSeats(Long showtimeId){
         Showtime showtime = showtimeRepository.findById(showtimeId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy suất chiếu với id: " + showtimeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy suất chiếu với id: " + showtimeId));
 
         // ấy tất cả ghế của phòng
         List<Seat> allSeats = seatRepository.findActiveSeatsByHallId(showtime.getHall().getId());
@@ -66,24 +68,24 @@ public class BookingService {
     @Transactional
     public BookingResponse createBooking(BookingRequest request, String userEmail){
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + userEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + userEmail));
 
         Showtime showtime = showtimeRepository.findById(request.getShowtimeId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy suất chiếu với id): " + request.getShowtimeId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy suất chiếu với id): " + request.getShowtimeId()));
 
 //        Kiểm tra suất chiếu đã qua chưa
         if (showtime.getStartTime().isBefore(LocalDateTime.now())){
-            throw new RuntimeException("Không thể đặt vé cho suất chiếu đã bắt đầu");
+            throw new BookingException("Không thể đặt vé cho suất chiếu đã bắt đầu");
         }
 
 //        Kiểm tra ghế còn trống không
         List<Long> bookedSeats = seatRepository.findBookedSeatIdsByShowtime(request.getShowtimeId());
         if(bookedSeats.contains(request.getSeatId())){
-            throw new RuntimeException("Một hoặc nhiều ghế đã được đặt, vui lòng chọn ghế khác");
+            throw new BookingException("Một hoặc nhiều ghế đã được đặt, vui lòng chọn ghế khác");
         }
 
         Seat seat = seatRepository.findById(request.getSeatId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy ghế với id: " + request.getSeatId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ghế với id: " + request.getSeatId()));
 
 //        Tính giá vé
         BigDecimal price = calculateSeatPrice(showtime, seat);
@@ -91,7 +93,7 @@ public class BookingService {
 //        Áp dụng khuyến mãi nếu có
         if (request.getPromotionCode() != null && request.getPromotionCode().isEmpty()){
             Promotion promotion = promotionRepository.findByCode(request.getPromotionCode())
-                    .orElseThrow(() -> new RuntimeException("Mã khuyến mãi không hợp lệ"));
+                    .orElseThrow(() -> new BookingException("Mã khuyến mãi không hợp lệ"));
 
             price = applyPromotion(price, promotion);
             promotion.setUsedCount(promotion.getUsedCount() + 1);
@@ -114,22 +116,22 @@ public class BookingService {
     @Transactional
     public BookingResponse confirmPayment (Long ticketId, String paymentMethod) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé với id: " + ticketId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vé với id: " + ticketId));
 
         if (ticket.getStatus() != TicketStatus.PENDING) {
-            throw new RuntimeException("Chỉ có thể thanh toán cho vé đang chờ xử lý");
+            throw new BookingException("Chỉ có thể thanh toán cho vé đang chờ xử lý");
         }
 
 //        Kiểm tra suất chiếu đã qua chưa
         if (ticket.getShowtime().getStartTime().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Không thể thanh toán cho suất chiếu đã bắt đầu");
+            throw new BookingException("Không thể thanh toán cho suất chiếu đã bắt đầu");
         }
 
         // Kiểm tra suất chiếu đã qua chưa
         if (ticket.getShowtime().getStartTime().isBefore(LocalDateTime.now())) {
             ticket.setStatus(TicketStatus.EXPIRED);
             ticketRepository.save(ticket);
-            throw new RuntimeException("Suất chiếu đã bắt đầu, vé đã hết hạn");
+            throw new BookingException("Suất chiếu đã bắt đầu, vé đã hết hạn");
         }
 
 //        Cập nhập trạng thái vé
@@ -156,17 +158,17 @@ public class BookingService {
     @Transactional
     public BookingResponse cancelBooking (Long tickdetId, String userEmail){
         Ticket ticket = ticketRepository.findById(tickdetId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé với id: " + tickdetId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vé với id: " + tickdetId));
 
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + userEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + userEmail));
 
         if (!ticket.getUser().getId().equals(user.getId())){
-            throw new RuntimeException("Bạn không có quyền hủy vé này");
+            throw new BookingException("Bạn không có quyền hủy vé này");
         }
 
         if (ticket.getStatus() != TicketStatus.PENDING){
-            throw new RuntimeException("Chỉ có thể hủy vé chưa thanh toán");
+            throw new BookingException("Chỉ có thể hủy vé chưa thanh toán");
         }
 
         ticket.setStatus(TicketStatus.CANCELLED);
@@ -178,7 +180,7 @@ public class BookingService {
 //    Lấy lịch sử đặt vé của user
     public List<BookingResponse> getUserBookings (String userEmail){
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với email: " + userEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng với email: " + userEmail));
 
         return ticketRepository.findById(user.getId()).stream()
                 .map(this::convertToBookingResponse)
@@ -188,7 +190,7 @@ public class BookingService {
 //    Tạo QR code cho vé
     public String generateQRCode(Long ticketId){
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy vé với id: " + ticketId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vé với id: " + ticketId));
 
         return qrCodeGenerator.generateQRCode(ticket.getCode());
     }

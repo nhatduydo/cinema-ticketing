@@ -5,6 +5,7 @@ import dto.request.LoginRequest;
 import dto.request.RegisterRequest;
 import dto.response.AuthResponse;
 import entity.User;
+import exception.AuthenticationException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,11 +26,11 @@ public class AuthService {
     public AuthResponse login(LoginRequest request){
 //        1. find user by email
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng"));
+                .orElseThrow(() -> new AuthenticationException("Email hoặc mật khẩu không đúng"));
 
 //        2. check password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
-            throw new RuntimeException("Email hoặc mật khẩu không đúng");
+            throw new AuthenticationException("Email hoặc mật khẩu không đúng");
         }
 
 //        3. generate token
@@ -49,7 +50,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request){
 //        1. kiểm tra email tồn tại chưa
         if (userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email đã được đăng ký");
+            throw new AuthenticationException("Email đã được đăng ký");
         }
 
 //        2. tạo user mới
@@ -75,7 +76,7 @@ public class AuthService {
     @Transactional
     public void forgotPassword (String email){
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new AuthenticationException("Email không tồn tại"));
 
 //        Tạo reset password
         String resetToken = UUID.randomUUID().toString();
@@ -91,10 +92,10 @@ public class AuthService {
     @Transactional
     public void resetPassword (String token, String newPassword){
         User user = userRepository.findByResetToken(token)
-                .orElseThrow(() -> new RuntimeException("Token không hợp lệ"));
+                .orElseThrow(() -> new AuthenticationException("Token không hợp lệ"));
 
         if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())){
-            throw new RuntimeException("Token đã hết hạn");
+            throw new AuthenticationException("Token đã hết hạn");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
